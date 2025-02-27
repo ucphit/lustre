@@ -1,4 +1,8 @@
 ---
+- name: Ensure facts are gathered
+  ansible.builtin.setup:
+  when: ansible_all_ipv4_addresses is not defined
+
 - name: Run lctl command
   ansible.builtin.command: lctl dl
   register: lctl_output
