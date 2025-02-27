@@ -23,3 +23,9 @@
 - name: Reload systemd
   ansible.builtin.systemd:
     daemon_reload: true
+
+- name: Start lsnapbackup service
+  ansible.builtin.systemd:
+    name: lsnapbackup.service
+    state: started
+    enabled: yes
