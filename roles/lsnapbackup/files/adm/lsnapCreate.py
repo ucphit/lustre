@@ -6,7 +6,7 @@ from datetime import datetime
 def main():
     parser = argparse.ArgumentParser(description="Delete snapshots for a filesystem")
     parser.add_argument("-f", "--filesystem", required=True, help="Filesystem name")
-    parser.add_argument("-l", "--label", required=True, choices=["hour_local", "day_local", "week_localq"], help="Snapshot class (hour, day or week)")
+    parser.add_argument("-l", "--label", required=True, choices=["hour_local", "day_local", "week_local"], help="Snapshot class (hour, day or week)")
 
     args = parser.parse_args()
     lsnapcreate(args.filesystem,args.filesystem+'_'+args.label)
