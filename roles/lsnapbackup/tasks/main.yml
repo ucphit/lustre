@@ -1,6 +1,6 @@
 ---
 - name: Run info play from project
-  ansible.builtin.include_tasks: "{{ role_path }}/../../info_playbook.yml"
+  ansible.builtin.include_tasks: "{{ role_path }}/../../info_play.yml"
 
 - name: Ensure Python3 and pip are installed
   ansible.builtin.package:
