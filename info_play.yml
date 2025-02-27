@@ -18,6 +18,15 @@
     msg: "Error: No MGC IP address found in 'lctl dl' output!"
   when: mgc_ip == ""
 
+- name: Get list of all IP addresses on this host
+  ansible.builtin.set_fact:
+    host_ips: "{{ ansible_all_ipv4_addresses }}"
+
+- name: Fail if mgc_ip is not one of the host's IPs
+  ansible.builtin.fail:
+    msg: "Error: MGC IP {{ mgc_ip }} is not assigned to this host!"
+  when: mgc_ip not in host_ips
+
 - name: Display extracted IP address
   ansible.builtin.debug:
     msg: "Extracted MGC IP address: {{ mgc_ip }}"
