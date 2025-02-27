@@ -10,6 +10,14 @@
     group: root
     mode: u=rwx,g=rwx,o=r
 
+- name: Templating the snapDestroy script
+  ansible.builtin.template:
+    src: lsnapDestroy.py.j2
+    dest: /lustre/adm/lsnapDestroy.py
+    owner: root
+    group: root
+    mode: u=rwx,g=rwx,o=r
+
 - name: Copy script to mgs
   ansible.builtin.copy:
     src: "{{ item }}"

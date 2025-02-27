@@ -3,21 +3,15 @@
 import argparse ,shared, sys, socket
 from datetime import datetime,timedelta
 
-#Get the primary datacenter
-dc = socket.gethostname().split('.')[0][:5]
-
-if shared.ldevInfo()[0] == 1:
-    cluster_info = shared.ldevInfo()[1:]
+if shared.ldevInfo({{ primary_mgs }}, )[0] == 1:
+    primary_cluster = shared.ldevInfo({{ primary_mgs }}, )[1:]
 else:
     shared.log("LSNAPRETENTION", f"Error in retrieving ldev info")
 
-lists, full_lists_primary, full_lists_secondary = {}, {}, {}
-
-mapping = {"pstor": "kstor", "kstor": "pstor"}
-backup_dc = mapping.get(dc)
-if not backup_dc:
-    shared.log("LSNAPRETENTION", f"Error no backup dc")
-    sys.exit("An error occurred")
+if shared.ldevInfo({{ secondary_mgs }}, )[0] == 1:
+    primary_cluster = shared.ldevInfo({{ secondary_mgs }}, )[1:]
+else:
+    shared.log("LSNAPRETENTION", f"Error in retrieving ldev info")
 
 def main():
     parser = argparse.ArgumentParser(description="Delete snapshots for a filesystem")
@@ -27,11 +21,10 @@ def main():
 
     args = parser.parse_args()
     list = capture_snapshot_info(args.filesystem,args.snapshot_class,args.policy)
-    for item in cluster_info:
-        for i in list:
-            #print(f"ssh {item[0]} zfs destroy {item[2]}@{i} >/dev/null 2>&1")
-            delete_snapshot(item[0], f"{item[2]}@{i}")
-            delete_snapshot(item[0].replace(dc,backup_dc), f"{item[2]}@{i}")
+    for cluster in (primary_cluster, secondary_cluster):
+        for item in cluster:
+            for i in list:
+                delete_snapshot(item[0], f"{item[2]}@{i}")
 
 def capture_snapshot_info(fs,timestamp,snap_age):
     snap_list = []
