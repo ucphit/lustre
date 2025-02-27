@@ -12,7 +12,7 @@ The snapshot retention is controlled by passing hourly, daily, weekly retention 
 - name: Setup snapshot backup on lustre filesystem
   hosts: role_mgs
   become: yes
-  gather_facts: no
+  gather_facts: yes
 
   roles:
     - role: ucphit.lustre.lsnapbackup
@@ -20,8 +20,7 @@ The snapshot retention is controlled by passing hourly, daily, weekly retention 
         hours: 1
         days: 30
         weeks: 180
-      when: system == primary_site
 
-In thsi case the primary_site is defined in group_vars and hourly, daily and weekly snapshots are kept for respectively 1, 30 and 180 days (1 day, 1 month and 6 months)
+In this case the hourly, daily and weekly snapshots are kept for respectively 1, 30 and 180 days (1 day, 1 month and 6 months)
 
 
