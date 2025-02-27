@@ -1,0 +1,13 @@
+---
+- name: Run lctl command
+  ansible.builtin.command: lctl list_nids
+  register: lctl_output
+  changed_when: false
+
+- name: Extract MGC IP from lctl output
+  ansible.builtin.set_fact:
+    mgc_ip: "{{ lctl_output.stdout_lines | select('search', 'MGC#[0-9.]+@tcp') | map('regex_search', 'MGC#([0-9.]+)@tcp', '\\1') | first }}"
+  
+- name: Show extracted MGC IP
+  ansible.builtin.debug:
+    msg: "MGC IP Address: {{ mgc_ip }}"
