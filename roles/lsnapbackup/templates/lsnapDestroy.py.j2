@@ -3,13 +3,13 @@
 import argparse ,shared, sys, socket
 from datetime import datetime,timedelta
 
-if shared.ldevInfo({{ primary_mgs }}, )[0] == 1:
-    primary_cluster = shared.ldevInfo({{ primary_mgs }}, )[1:]
+if shared.ldevInfo(f'{{ primary_mgs }}', )[0] == 1:
+    primary_cluster = shared.ldevInfo(f'{{ primary_mgs }}', )[1:]
 else:
     shared.log("LSNAPRETENTION", f"Error in retrieving ldev info")
 
-if shared.ldevInfo({{ secondary_mgs }}, )[0] == 1:
-    primary_cluster = shared.ldevInfo({{ secondary_mgs }}, )[1:]
+if shared.ldevInfo(f'{{ secondary_mgs }}', )[0] == 1:
+    primary_cluster = shared.ldevInfo(f'{{ secondary_mgs }}', )[1:]
 else:
     shared.log("LSNAPRETENTION", f"Error in retrieving ldev info")
 
