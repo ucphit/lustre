@@ -67,7 +67,7 @@ def make_zfs_snapshot(node,dataset,name):
 
 def ldevInfo(node, path='/etc/ldev.conf'):
     column_pairs=[]
-    command = f'ssh { node } cat { path }'
+    command = f'ssh { node } "cat { path }"'
     result = run_command(command)
     if result[0] == 0:
         column_pairs = [0,result[1]]
