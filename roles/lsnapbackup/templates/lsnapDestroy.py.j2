@@ -9,7 +9,7 @@ else:
     shared.log("LSNAPRETENTION", f"Error in retrieving ldev info")
 
 if shared.ldevInfo(f'{{ secondary_mgs }}', )[0] == 1:
-    primary_cluster = shared.ldevInfo(f'{{ secondary_mgs }}', )[1:]
+    secondary_cluster = shared.ldevInfo(f'{{ secondary_mgs }}', )[1:]
 else:
     shared.log("LSNAPRETENTION", f"Error in retrieving ldev info")
 
