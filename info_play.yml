@@ -1,6 +1,6 @@
 ---
 - name: Run lctl command
-  ansible.builtin.command: lctl list_nids
+  ansible.builtin.command: lctl dl
   register: lctl_output
   changed_when: false
 
