@@ -27,28 +27,15 @@
     path: /lustre/adm
     state: directory
 
-#- name: Make the directory for python modules
-#  ansible.builtin.file:
-#    path: /lustre/adm/modules
-#    state: directory
-
-#- name: Copy python modules
-#  ansible.builtin.copy:
-#    src: "{{ item }}"
-#    dest: /lustre/adm/modules
-#    owner: root
-#    group: root
-#    mode: u=rwx,g=rwx,o=r
-#  with_fileglob:
-#    - "plugins/module_utils/*"
-
 - name: Copy script to mgs
   ansible.builtin.copy:
-    src: "files/adm/lustre_snapbackup.py"
+    src: "{{ item }}"
     dest: /lustre/adm/
     owner: root
     group: root
     mode: u=rwx,g=rwx,o=r
+  with_fileglob:
+    - "files/adm/*"
 
 - name: Copy service to mgs
   ansible.builtin.copy:
