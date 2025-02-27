@@ -27,6 +27,14 @@
     path: /lustre/adm
     state: directory
 
+- name: Templating the backup script
+  ansible.builtin.template:
+    src: lustre_snapbackup.py.j2
+    dest: /lustre/adm/lustre_snapbackup.py
+    owner: root
+    group: root
+    mode: u=rwx,g=rwx,o=r
+
 - name: Copy script to mgs
   ansible.builtin.copy:
     src: "{{ item }}"

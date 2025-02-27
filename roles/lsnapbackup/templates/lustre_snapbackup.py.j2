@@ -4,9 +4,9 @@ import threading, time, signal, argparse, shared
 #from shared import shared
 
 # Retention in days
-hour_retention = '1'
-day_retention = '28'
-week_retention = '120'
+hour_retention = {{ hours }}
+day_retention = {{ days }}
+week_retention = {{ weeks }}
 
 def snap_hour_ret():
     while not stop_event.is_set():
