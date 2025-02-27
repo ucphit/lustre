@@ -8,7 +8,7 @@
 
 - name: Copy Python package to target system
   ansible.builtin.copy:
-    src: "{{ role_path }}/files/python_package"
+    src: "{{ role_path }}/files/python_package/"
     dest: /tmp/lustre_common
     mode: "0755"
 
