@@ -13,7 +13,7 @@ def snap_hour_ret():
         shared.log("SNAPRETENTION", "Running hour retention task...")
         cmd = f'/lustre/adm/lsnapDestroy.py -f dstor -c hour -p {hour_retention}'
         result = shared.run_command(cmd)
-        if result == 'retry':
+        if result[0] == 0:
             shared.log("SNAPRETENTION", "Command failed, waiting for 2 minutes before retrying...")
             if stop_event.wait(2 * 60): 
                 break
@@ -27,7 +27,7 @@ def snap_day_ret():
         shared.log("SNAPRETENTION", "Running day retention task...")
         cmd = f'/lustre/adm/lsnapDestroy.py -f dstor -c day -p {day_retention}'
         result = shared.run_command(cmd)
-        if result == 'retry':
+        if result[0] == 0:
             shared.log("SNAPRETENTION", "Command failed, waiting for 2 minutes before retrying...")
             if stop_event.wait(2 * 60): 
                 break
@@ -41,7 +41,7 @@ def snap_week_ret():
         shared.log("SNAPRETENTION", "Running week retention task...")
         cmd = f'/lustre/adm/lsnapDestroy.py -f dstor -c week -p {week_retention}'
         result = shared.run_command(cmd)
-        if result == 'retry':
+        if result[0] == 0:
             shared.log("SNAPRETENTION", "Command failed, waiting for 2 minutes before retrying...")
             if stop_event.wait(2 * 60): 
                 break
@@ -55,7 +55,7 @@ def snap_hourly():
         shared.log("LSNAPBACKUP", "Running hourly task...")
         cmd = f'/lustre/adm/lsnapCreate.py dstor hour_local'
         result = shared.run_command(cmd)
-        
+        print(type(result)__name__)
         if result[0] == 0:
             shared.log("LSNAPBACKUP", "Command failed, waiting for 2 minutes before retrying...")
             if stop_event.wait(2 * 60): 
