@@ -4,10 +4,20 @@
   register: lctl_output
   changed_when: false
 
-- name: Extract MGC IP from lctl output
+- name: Fail if lctl output is empty
+  ansible.builtin.fail:
+    msg: "Error: 'lctl dl' did not return any output! This is not the primary MGC"
+  when: lctl_output.stdout is not defined or lctl_output.stdout | trim == ""
+
+- name: Extract IP address from MGC line
   ansible.builtin.set_fact:
-    mgc_ip: "{{ lctl_output.stdout_lines | select('search', 'MGC#[0-9.]+@tcp') | map('regex_search', 'MGC#([0-9.]+)@tcp', '\\1') | first }}"
-  
-- name: Show extracted MGC IP
+    mgc_ip: "{{ lctl_output.stdout | regex_search('MGC(\\d+\\.\\d+\\.\\d+\\.\\d+)@tcp', '\\1') | first | default('') }}"
+
+- name: Fail if no IP address was found
+  ansible.builtin.fail:
+    msg: "Error: No MGC IP address found in 'lctl dl' output!"
+  when: mgc_ip == ""
+
+- name: Display extracted IP address
   ansible.builtin.debug:
-    msg: "MGC IP Address: {{ mgc_ip }}"
+    msg: "Extracted MGC IP address: {{ mgc_ip }}"
