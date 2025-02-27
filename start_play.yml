@@ -31,6 +31,31 @@
     msg: "Error: MGC IP {{ mgc_ip }} is not assigned to this host!"
   when: mgc_ip not in host_ips
 
-- name: Display extracted IP address
-  ansible.builtin.debug:
-    msg: "Extracted MGC IP address: {{ mgc_ip }}"
+- name: Ensure Python3 and pip are installed
+  ansible.builtin.package:
+    name:
+      - python3
+      - python3-pip
+    state: present
+
+- name: Copy Python package to target system
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/python_package/"
+    dest: /tmp/lustre
+    mode: "0755"
+
+- name: Install shared.py as a Python package
+  ansible.builtin.command:
+    cmd: "pip3 install --no-cache-dir /tmp/lustre"
+  changed_when: false
+
+- name: Cleanup
+  ansible.builtin.file:
+    path: /tmp/lustre
+    state: absent
+
+- name: Make the directory for adm scripts
+  ansible.builtin.file:
+    path: /lustre/adm
+    state: directory
+    recurse: yes
