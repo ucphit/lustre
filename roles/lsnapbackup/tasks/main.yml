@@ -14,7 +14,7 @@
 
 - name: Install shared.py as a Python package
   ansible.builtin.command:
-    cmd: "pip3 install /tmp/lustre_common"
+    cmd: "pip3 install --no-cache-dir /tmp/lustre_common"
   changed_when: false
 
 - name: Make the directory for adm scripts
