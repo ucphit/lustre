@@ -9,12 +9,12 @@
 - name: Copy Python package to target system
   ansible.builtin.copy:
     src: "{{ role_path }}/files/python_package/"
-    dest: /tmp/lustre_common
+    dest: /tmp/lustre
     mode: "0755"
 
 - name: Install shared.py as a Python package
   ansible.builtin.command:
-    cmd: "pip3 install --no-cache-dir /tmp/lustre_common"
+    cmd: "pip3 install --no-cache-dir /tmp/lustre"
   changed_when: false
 
 - name: Make the directory for adm scripts
