@@ -60,5 +60,5 @@
 - name: Start lsnapbackup service
   ansible.builtin.systemd:
     name: lsnapbackup.service
-    state: started
+    state: restarted
     enabled: yes
