@@ -53,9 +53,8 @@ def snap_week_ret():
 def snap_hourly():
     while not stop_event.is_set():
         shared.log("LSNAPBACKUP", "Running hourly task...")
-        cmd = f'/lustre/adm/lsnapCreate.py dstor hour_local'
+        cmd = f'/lustre/adm/lsnapCreate.py -f dstor -l hour_local'
         result = shared.run_command(cmd)
-        print(type(result)__name__)
         if result[0] == 0:
             shared.log("LSNAPBACKUP", "Command failed, waiting for 2 minutes before retrying...")
             if stop_event.wait(2 * 60): 
@@ -68,7 +67,7 @@ def snap_hourly():
 def snap_daily():
     while not stop_event.is_set():
         shared.log("LSNAPBACKUP", "Running daily task...")
-        cmd = f'/lustre/adm/lsnapCreate.py dstor day_local'
+        cmd = f'/lustre/adm/lsnapCreate.py -f dstor -l day_local'
         result = shared.run_command(cmd)
         if result[0] == 0:
             shared.log("LSNAPBACKUP", "Command failed, waiting for 2 minutes before retrying...")
@@ -82,7 +81,7 @@ def snap_daily():
 def snap_weekly():
     while not stop_event.is_set():
         shared.log("LSNAPBACKUP", "Running 24-hour task...")
-        cmd = f'/lustre/adm/lsnapCreate.py dstor week_local'
+        cmd = f'/lustre/adm/lsnapCreate.py -f dstor -l week_local'
         result = shared.run_command(cmd)
         if result[0] == 0:
             shared.log("LSNAPBACKUP", "Command failed, waiting for 2 minutes before retrying...")
@@ -108,7 +107,7 @@ def main():
 
     if args.shell:
         shared.log("LSNAPBACKUP", "Running hourly task...")
-        cmd = f'/lustre/adm/lsnapCreate.py dstor hour_local'
+        cmd = f'/lustre/adm/lsnapCreate.py -f dstor -l hour_local'
         result = shared.run_command(cmd)
         if result[0] == 0:
             shared.log("LSNAPBACKUP", "Command failed, waiting for 2 minutes before retrying...")

@@ -9,7 +9,7 @@ def main():
     parser.add_argument("-l", "--label", required=True, choices=["hour_local", "day_local", "week_localq"], help="Snapshot class (hour, day or week)")
 
     args = parser.parse_args()
-    lsnapcreate(args.filesystem,args.label)
+    lsnapcreate(args.filesystem,args.filesystem+args.label)
 
 def lsnapcreate(fs,name):
     timestamp = datetime.now().strftime("%a%b%d%H%M%Y")
