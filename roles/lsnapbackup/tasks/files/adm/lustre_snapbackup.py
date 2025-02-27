@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import threading, time, signal, argparse
-from ansible_collections.ucphit.lustre.plugins.module_utils import shared
+from modules import shared
 
 # Retention in days
 hour_retention = '1'
