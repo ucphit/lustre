@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-import threading, time, signal, argparse
-from lustre import shared
+import threading, time, signal, argparse, shared
+#from shared import shared
 
 # Retention in days
 hour_retention = '1'
