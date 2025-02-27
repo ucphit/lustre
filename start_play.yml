@@ -44,10 +44,13 @@
     dest: /tmp/lustre
     mode: "0755"
 
+- name: Uninstall shared fot changes
+  ansible.builtin.command:
+    cmd: "pip3 uninstall -y shared"
+
 - name: Install shared.py as a Python package
   ansible.builtin.command:
     cmd: "pip3 install --no-cache-dir /tmp/lustre"
-  changed_when: false
 
 - name: Cleanup
   ansible.builtin.file:
