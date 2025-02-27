@@ -1,23 +1,41 @@
 ---
+- name: Ensure Python3 and pip are installed
+  ansible.builtin.package:
+    name:
+      - python3
+      - python3-pip
+    state: present
+
+- name: Copy Python package to target system
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/python_package"
+    dest: /tmp/lustre_common
+    mode: "0755"
+
+- name: Install shared.py as a Python package
+  ansible.builtin.command:
+    cmd: "pip3 install /tmp/lustre_common"
+  changed_when: false
+
 - name: Make the directory for adm scripts
   ansible.builtin.file:
     path: /lustre/adm
     state: directory
 
-- name: Make the directory for python modules
-  ansible.builtin.file:
-    path: /lustre/adm/modules
-    state: directory
+#- name: Make the directory for python modules
+#  ansible.builtin.file:
+#    path: /lustre/adm/modules
+#    state: directory
 
-- name: Copy python modules
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: /lustre/adm/modules
-    owner: root
-    group: root
-    mode: u=rwx,g=rwx,o=r
-  with_fileglob:
-    - "plugins/module_utils/*"
+#- name: Copy python modules
+#  ansible.builtin.copy:
+#    src: "{{ item }}"
+#    dest: /lustre/adm/modules
+#    owner: root
+#    group: root
+#    mode: u=rwx,g=rwx,o=r
+#  with_fileglob:
+#    - "plugins/module_utils/*"
 
 - name: Copy script to mgs
   ansible.builtin.copy:
