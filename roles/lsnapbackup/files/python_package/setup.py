@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="lustre",
+    name="shared",
     version="1.0",
-    packages=["lustre"],
+    packages=find_packages(),
     install_requires=[],
 )

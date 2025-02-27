@@ -17,6 +17,11 @@
     cmd: "pip3 install --no-cache-dir /tmp/lustre"
   changed_when: false
 
+- name: Cleanup
+  ansible.builtin.file:
+    path: /tmp/lustre
+    state: absent
+
 - name: Make the directory for adm scripts
   ansible.builtin.file:
     path: /lustre/adm
