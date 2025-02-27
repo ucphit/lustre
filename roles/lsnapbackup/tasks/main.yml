@@ -1,0 +1,25 @@
+---
+- name: Make the directory for adm scripts
+  ansible.builtin.file:
+    path: /lustre/adm
+    state: directory
+
+- name: Copy script to mgs
+  ansible.builtin.copy:
+    src: "files/adm/lustre_snapbackup.py"
+    dest: /lustre/adm/
+    owner: root
+    group: root
+    mode: u=rwx,g=rwx,o=r
+
+- name: Copy service to mgs
+  ansible.builtin.copy:
+    src: "files/services/lsnapbackup.service"
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: u=rwx,g=rwx,o=r
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
