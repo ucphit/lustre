@@ -1,0 +1,15 @@
+[Unit]
+Description=Snapshot replication daemon
+After=network.target
+
+[Service]
+User=root
+Group=root
+ExecStart=/lustre/adm/lustre_snapreplication.py
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

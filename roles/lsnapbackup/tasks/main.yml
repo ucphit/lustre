@@ -1,6 +1,6 @@
 ---
 - name: Run info play from project
-  ansible.builtin.include_tasks: "{{ role_path }}/../../start_play.yml"
+  ansible.builtin.include_tasks: "{{ role_path }}/../../ini_mgs_services.yml"
 
 - name: Templating the backup script
   ansible.builtin.template:
