@@ -1,1 +1,2 @@
-Lustre snapshot replication between primary site and secondary site
+# Lustre site replication
+A role that configures zfs replication from primary to secondary site.

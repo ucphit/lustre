@@ -24,7 +24,7 @@ The snapshot retention is controlled by passing hourly, daily, weekly retention 
         secondary_mgs: mgsserver02
 
 
-In this case the hourly, daily and weekly snapshots are kept for respectively 1, 30 and 180 days (1 day, 1 month and 6 months). THe primary_mgs should be an injective mapping onto inventory_hostname, and both primary_mgs and secondary_mgs should resolve.
+In this case the hourly, daily and weekly snapshots are kept for respectively 1, 30 and 180 days (1 day, 1 month and 6 months). THe primary_mgs should be an injective mapping onto inventory_hostname, and both primary_mgs and secondary_mgs should resolve in ldev.conf.
 
 
 
