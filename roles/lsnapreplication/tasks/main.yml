@@ -1,7 +1,4 @@
 ---
-- name: Run info play from project
-  ansible.builtin.include_tasks: "{{ role_path }}/../../ini_mgs_services.yml"
-
 - name: Templating the replication script
   ansible.builtin.template:
     src: lustre_snapreplication.py.j2
@@ -20,7 +17,7 @@
 
 - name: Copy service to mgs
   ansible.builtin.copy:
-    src: "files/services/lsnapbackup.service"
+    src: "files/services/lreplication.service"
     dest: /etc/systemd/system/
     owner: root
     group: root

@@ -3,6 +3,9 @@
 import argparse, shared, socket, sys, time
 from concurrent.futures import ThreadPoolExecutor
 
+lists = {}
+full_lists = {}
+
 snapshot_file = "/var/log/last_snapshot.txt"
 
 if shared.ldevInfo(f'{{ primary_mgs }}', )[0] == 1:
@@ -21,28 +24,16 @@ def main():
     args = parser.parse_args()
 
     create_lists()
-
     intersection = find_intersection(lists)
 
     if args.fixup == 'False':
-        for key, list in full_lists_primary.items():
-            for i in list:
-                if i.split('@')[1] not in intersection:
-                    shared.log("FIXUP", f"Require deleting {i} on {key.split('_')[0]}\n")
-        for key, list in full_lists_secondary.items():
+        for key, list in full_lists.items():
             for i in list:
                 if i.split('@')[1] not in intersection:
                     shared.log("FIXUP", f"Require deleting {i} on {key.split('_')[0]}\n")
 
-    #Deleting everything not in the intersection on a fixup
     if args.fixup == 'True':
-        for key, list in full_lists_primary.items():
-            for i in list:
-                if i.split('@')[1] not in intersection:
-                    shared.log("FIXUP", f"Deleting {i} on {key.split('_')[0]}\n")
-                    cmd = f"ssh {key.split('_')[0]} zfs destroy {i} >/dev/null 2>&1"
-                    shared.run_command(cmd)
-        for key, list in full_lists_secondary.items():
+        for key, list in full_lists.items():
             for i in list:
                 if i.split('@')[1] not in intersection:
                     shared.log("FIXUP", f"Deleting {i} on {key.split('_')[0]}\n")
@@ -51,17 +42,17 @@ def main():
 
     create_lists()
     intersection = find_intersection(lists)
-
-    for i in cluster_info:
-        rc = 0
-        if set(lists[f'{i[0]}_{i[2]}']) != set(intersection):
-            rc =  1
-        if set(lists[f"{i[0].replace(dc,backup_dc)}_{i[2]}"]) != set(intersection):
-            rc =  1
+    rc = 0
+    for cluster in (primary_cluster, secondary_cluster):
+        for i in cluster:
+            if set(lists[f'{i[0]}_{i[2]}']) != set(intersection):
+                rc =  rc + 1
     shared.log("FIXUP", f"rc is {rc}")
 
-    if args.fixup == 'True' and rc == 0 and lists['pstormgs01_p_mgs/mgs']:
-        baseline = lists['pstormgs01_p_mgs/mgs'][-1]
+    first_list = next(iter(lists.values()))
+
+    if args.fixup == 'True' and rc == 0: 
+        baseline = first_list[-1]
         shared.log("FIXUP", 'Here we go..')
         shared.stop_service('lsnapbackup.service')
         shared.stop_service('lreplication.service')
@@ -72,14 +63,14 @@ def main():
         shared.log("FIXUP", f"Creating new snapshot: {new_snapshot_name}")
 
         # make new snapshot on all nodes
-        for i in cluster_info:
+        for i in primary_cluster:
             shared.make_zfs_snapshot(i[0],i[2],new_snapshot_name)
             shared.log("FIXUP", "Incremental replication")
 
         with ThreadPoolExecutor() as executor:
 
             shared.log("FIXUP", f"Performing incremental replication from {baseline}")
-            futures = [executor.submit(replicate, i, new_snapshot_name, baseline) for i in cluster_info]
+            futures = [executor.submit(replicate, i, new_snapshot_name, baseline) for i in primary_cluster]
             for future in futures:
                 future.result()
 
@@ -93,29 +84,33 @@ def main():
 
 def create_lists():
     global lists, full_lists
-
     for cluster in (primary_cluster, secondary_cluster):
         for i in cluster:
             lists[f'{i[0]}_{i[2]}'] = [item.split('@')[1] for item in shared.get_zfs_snapshots(i[0],i[2])[1:]]
             full_lists[f'{i[0]}_{i[2]}'] = [item for item in shared.get_zfs_snapshots(i[0],i[2])[1:]]
 
 def replicate(i, new_snapshot_name, baseline):
+    pairs = []
+    for primary in primary_cluster:
+        key = primary[2]
+        secondary = next((s for s in secondary_cluster if s[2] == key), None)   
+        if secondary is None:
+            shared.log("SNAPREPLICATION", f"Error in compairing ldev's")
+            raise ValueError(f"No match found for {primary}")
+        pairs.append([primary[0],secondary[0]])
 
-    ssh_command = f'ssh {i[0]} "zfs send -R -I {i[2]}@{baseline} {i[2]}@{new_snapshot_name} | ssh {i[0].replace("pstor","kstor")} zfs receive -F {i[2]}"'
+    backup_node = next((pair[1] for pair in pairs if pair[0] == i[0]), None)
+
+    ssh_command = f'ssh {i[0]} "zfs send -R -I {i[2]}@{baseline} {i[2]}@{new_snapshot_name} | ssh {backup_node} zfs receive -F {i[2]}"'
     shared.log("FIXUP", f"Executing replication command: {ssh_command}")
     shared.run_command(ssh_command)
 
 def find_intersection(lists_dict):
     if not lists_dict:
         return []
-
     all_values = (set(lst) for lst in lists_dict.values())
     intersection = set.intersection(*all_values)
-
     return list(intersection)
-
-def list_difference(list1, list2):
-    return [item for item in list1 if item not in list2]
 
 if __name__ == "__main__":
     main()
