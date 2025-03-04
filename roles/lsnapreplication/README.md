@@ -6,7 +6,6 @@ The systemd service lreplication initiates replication from the primary to the s
 ## Usage
 
 ```
-...
   ---
   - name: Setup snapshot backup on lustre filesystem
     hosts: role_mgs
