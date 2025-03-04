@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import time, signal, shared, socket, sys
+import time, signal, shared, socket, sys, argparse
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 from itertools import zip_longest
@@ -99,6 +99,7 @@ def main():
             time.sleep(1)
 
     shared.log("SNAPREPLICATION", "Daemon stopped.")
+
 
 if __name__ == "__main__":
 

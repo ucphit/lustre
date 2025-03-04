@@ -17,8 +17,6 @@ Implementing the lreplication service
     roles:
       - role: ucphit.lustre.lsnapreplication
         vars:
-          mode: daemon
-          fixup: False 
           primary_mgs: mgsserver01
           secondary_mgs: mgsserver02
 
@@ -26,7 +24,7 @@ Implementing the lreplication service
 
 Fixing a failed lreplication service due inconsistency in snapshot history.
 
-### Dry-run
+#### Dry-run
 
 ```
 ---
@@ -36,16 +34,15 @@ Fixing a failed lreplication service due inconsistency in snapshot history.
     gather_facts: yes
 
     roles:
-      - role: ucphit.lustre.lsnapreplication
+      - role: ucphit.lustre.lsnapreplication_fixup
         vars:
-          mode: fixup
           fixup: False 
           primary_mgs: mgsserver01
           secondary_mgs: mgsserver02
 
 ```
 
-### Fixing snapshot inconsistency and start replication service
+#### Fixing snapshot inconsistency and start replication service
 
 ```
 ---
@@ -57,8 +54,7 @@ Fixing a failed lreplication service due inconsistency in snapshot history.
     roles:
       - role: ucphit.lustre.lsnapreplication
         vars:
-          mode: fixup
-          fixup: False 
+          fixup: True 
           primary_mgs: mgsserver01
           secondary_mgs: mgsserver02
 

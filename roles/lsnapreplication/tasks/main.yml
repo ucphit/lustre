@@ -7,14 +7,6 @@
     group: root
     mode: u=rwx,g=rwx,o=r
 
-- name: Templating the replication fixup script
-  ansible.builtin.template:
-    src: lreplication_fixup.py.j2
-    dest: /lustre/adm/lreplication_fixup.py
-    owner: root
-    group: root
-    mode: u=rwx,g=rwx,o=r
-
 - name: Copy service to mgs
   ansible.builtin.copy:
     src: "files/services/lreplication.service"
