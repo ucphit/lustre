@@ -5,18 +5,20 @@ The systemd service lreplication initiates replication from the primary to the s
 
 ## Usage
 
----
-- name: Setup snapshot backup on lustre filesystem
-  hosts: role_mgs
-  become: yes
-  gather_facts: yes
+```
+...
+  ---
+  - name: Setup snapshot backup on lustre filesystem
+    hosts: role_mgs
+    become: yes
+    gather_facts: yes
 
-  roles:
-    - role: ucphit.lustre.lsnapreplication
-      vars:
-        replicate: False
-        filesystem: dstor
-        primary_mgs: mgsserver01
-        secondary_mgs: mgsserver02
+    roles:
+      - role: ucphit.lustre.lsnapreplication
+        vars:
+          replicate: False
+          filesystem: dstor
+          primary_mgs: mgsserver01
+          secondary_mgs: mgsserver02
 
-
+```
