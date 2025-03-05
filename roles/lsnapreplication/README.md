@@ -34,7 +34,7 @@ Fixing a failed lreplication service due inconsistency in snapshot history.
     gather_facts: yes
 
     roles:
-      - role: ucphit.lustre.lsnapreplication_fixup
+      - role: ucphit.lustre.lreplication_fixup
         vars:
           fixup: False 
           primary_mgs: mgsserver01
@@ -52,7 +52,7 @@ Fixing a failed lreplication service due inconsistency in snapshot history.
     gather_facts: yes
 
     roles:
-      - role: ucphit.lustre.lsnapreplication
+      - role: ucphit.lustre.lreplication_fixup
         vars:
           fixup: True 
           primary_mgs: mgsserver01

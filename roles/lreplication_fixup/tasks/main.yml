@@ -9,4 +9,9 @@
 
 - name: Run fixup
   ansible.builtin.command: "/lustre/adm/lreplication_fixup.py -f {{ fixup }}"
+  register: output_log
+
+- name: Show output.log
+  ansible.builtin.debug:
+    msg: "{{ output_log }}"
 
