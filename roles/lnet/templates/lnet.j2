@@ -1,0 +1,28 @@
+net:
+    - net type: lo
+      local NI(s):
+        - nid: 0@lo
+          status: up
+          tunables:
+              peer_timeout: 0
+              peer_credits: 0
+              peer_buffer_credits: 0
+              credits: 0
+          lnd tunables:
+          dev cpt: 0
+          CPT: "[0]"
+    - net type: tcp0
+      local NI(s):
+        - nid: {{ ip }}@tcp0
+          status: up
+          interfaces:
+              0: {{ ansible_Lustre.device }}
+          tunables:
+              peer_timeout: 180
+              peer_credits: 8
+              peer_buffer_credits: 0
+              credits: 256
+          lnd tunables:
+              conns_per_peer: 2
+          dev cpt: -1
+          CPT: "[0]"
