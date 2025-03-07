@@ -1,19 +1,16 @@
 ---
-- name: Delete contents of /etc/ldev.conf
-  ansible.builtin.file:
-    path: /etc/ldev.conf
-    state: absent
 
 - name: Create /etc/ldev.conf
   ansible.builtin.file:
     path: /etc/ldev.conf
-    state: touch
+    state: file
     mode: '644'
 
 - name: Write mgs to /etc/ldev.conf
   ansible.builtin.lineinfile:
     path: /etc/ldev.conf
     line: "{{ item.key }}\t{{ item.value.failover }}\tMGS\tzfs:{{ item.value.zfs_pools}}/mgs"
+    state: present
   loop: "{{ lookup('ansible.builtin.dict', lcfg) }}"
   when: ( item.value.role == 'mgs') and (item.key.startswith(system))
 
