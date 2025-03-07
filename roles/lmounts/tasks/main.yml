@@ -1,11 +1,4 @@
 ---
-- name: testrun
-  hosts: role_mgs,role_mds,role_oss
-  become: yes
-  gather_facts: no
-
-  tasks:
-
   - name: Read ldev.conf
     ansible.builtin.command: cat /etc/ldev.conf
     register: file_lines
