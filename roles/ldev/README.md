@@ -21,11 +21,11 @@ In the following example one would end up with:
 
 ```
 nodemgs01	nodemgs02	MGS	zfs:p_mgs/mgs
-nodemds01	nodemds02	dstor-MDT0000	zfs:mds_0_dstor/dstor0
-nodeoss01	nodeoss02	dstor-OST0001	zfs:oss_1_dstor/dstor1
-nodeoss01	nodeoss02	dstor-OST0002	zfs:oss_2_dstor/dstor2
-nodeoss02	nodeoss01	dstor-OST0003	zfs:oss_3_dstor/dstor3
-nodeoss02	nodeoss01	dstor-OST0004	zfs:oss_4_dstor/dstor4
+nodemds01	nodemds02	fs-MDT0000	zfs:mds_0_fs/fs0
+nodeoss01	nodeoss02	fs-OST0001	zfs:oss_1_fs/fs1
+nodeoss01	nodeoss02	fs-OST0002	zfs:oss_2_fs/fs2
+nodeoss02	nodeoss01	fs-OST0003	zfs:oss_3_fs/fs3
+nodeoss02	nodeoss01	fs-OST0004	zfs:oss_4_fs/fs4
 ```
 
 ```
@@ -47,7 +47,7 @@ nodeoss02	nodeoss01	dstor-OST0004	zfs:oss_4_dstor/dstor4
                     failover: nodemds02
                     role: mds
                     zfs_pools:
-                    - filesystem: dstor
+                    - filesystem: fs
                         index: 0
                 nodemds02:
                     failover: nodemds01
@@ -56,17 +56,17 @@ nodeoss02	nodeoss01	dstor-OST0004	zfs:oss_4_dstor/dstor4
                     failover: nodeoss02
                     role: oss
                     zfs_pools:
-                    - filesystem: dstor
+                    - filesystem: fs
                         index: 1
-                    - filesystem: dstor
+                    - filesystem: fs
                         index: 2
                 nodeoss02:
                     failover: nodeoss01
                     role: oss
                     zfs_pools:
-                    - filesystem: dstor
+                    - filesystem: fs
                         index: 3
-                    - filesystem: dstor
+                    - filesystem: fs
                         index: 4
           
 

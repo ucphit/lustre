@@ -1,0 +1,24 @@
+---
+- name: Tjek om mountpoint allerede findes
+  ansible.builtin.stat:
+    path: "{{ mount_path  }}/{{ item['dataset'] }}"
+  register: mountpoint_status
+
+- name: debug
+  ansible.builtin.debug:
+    msg: "{{ mountpoint_status.stat.exists }}"
+
+- name: Opret mountpoint hvis det ikke findes
+  ansible.builtin.file:
+    path: "{{ mount_path  }}/{{ item['dataset'] }}"
+    state: directory
+    mode: '0755'
+  when: not mountpoint_status.stat.exists
+
+- name: Add mds/oss mountpoint to fstab
+  ansible.posix.mount:
+    path: "{{ mount_path }}/{{ item['dataset'] }}"
+    src: "{{ item['pool'] }}/{{ item['dataset'] }}"
+    fstype: lustre
+    opts: "{{ mount_opts }}"
+    state: present
