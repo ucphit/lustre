@@ -1,0 +1,64 @@
+---
+- name: Ensure facts are gathered
+  ansible.builtin.setup:
+  when: ansible_all_ipv4_addresses is not defined
+
+- name: Run lctl command
+  ansible.builtin.command: lctl dl
+  register: lctl_output
+  changed_when: false
+
+- name: Fail if lctl output is empty
+  ansible.builtin.fail:
+    msg: "Error: 'lctl dl' did not return any output! This is not the primary MGC"
+  when: lctl_output.stdout is not defined or lctl_output.stdout | trim == ""
+
+- name: Extract IP address from MGC line
+  ansible.builtin.set_fact:
+    mgc_ip: "{{ lctl_output.stdout | regex_search('MGC(\\d+\\.\\d+\\.\\d+\\.\\d+)@tcp', '\\1') | first | default('') }}"
+
+- name: Fail if no IP address was found
+  ansible.builtin.fail:
+    msg: "Error: No MGC IP address found in 'lctl dl' output!"
+  when: mgc_ip == ""
+
+- name: Get list of all IP addresses on this host
+  ansible.builtin.set_fact:
+    host_ips: "{{ ansible_all_ipv4_addresses }}"
+
+- name: Fail if mgc_ip is not one of the host's IPs
+  ansible.builtin.fail:
+    msg: "Error: MGC IP {{ mgc_ip }} is not assigned to this host!"
+  when: mgc_ip not in host_ips
+
+- name: Ensure Python3 and pip are installed
+  ansible.builtin.package:
+    name:
+      - python3
+      - python3-pip
+    state: present
+
+- name: Copy Python package to target system
+  ansible.builtin.copy:
+    src: "files/python_package/"
+    dest: /tmp/lustre
+    mode: "0755"
+
+- name: Uninstall shared fot changes
+  ansible.builtin.command:
+    cmd: "pip3 uninstall -y shared"
+
+- name: Install shared.py as a Python package
+  ansible.builtin.command:
+    cmd: "pip3 install --no-cache-dir /tmp/lustre"
+
+- name: Cleanup
+  ansible.builtin.file:
+    path: /tmp/lustre
+    state: absent
+
+- name: Make the directory for adm scripts
+  ansible.builtin.file:
+    path: /lustre/adm
+    state: directory
+    recurse: yes

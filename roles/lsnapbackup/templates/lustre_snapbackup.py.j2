@@ -1,0 +1,155 @@
+#!/usr/bin/python3
+
+import threading, time, signal, argparse, shared
+#from shared import shared
+
+# Retention in days
+hour_retention = {{ hours }}
+day_retention = {{ days }}
+week_retention = {{ weeks }}
+
+def snap_hour_ret():
+    while not stop_event.is_set():
+        shared.log("SNAPRETENTION", "Running hour retention task...")
+        cmd = f'/lustre/adm/lsnapDestroy.py -f dstor -c hour -p {hour_retention}'
+        result = shared.run_command(cmd)
+        if result[0] == 0:
+            shared.log("SNAPRETENTION", "Command failed, waiting for 2 minutes before retrying...")
+            if stop_event.wait(2 * 60): 
+                break
+        else:
+            shared.log("SNAPRETENTION", "Waiting for the next scheduled run...")
+            if stop_event.wait(12 * 60 * 60):
+                break
+
+def snap_day_ret():
+    while not stop_event.is_set():
+        shared.log("SNAPRETENTION", "Running day retention task...")
+        cmd = f'/lustre/adm/lsnapDestroy.py -f dstor -c day -p {day_retention}'
+        result = shared.run_command(cmd)
+        if result[0] == 0:
+            shared.log("SNAPRETENTION", "Command failed, waiting for 2 minutes before retrying...")
+            if stop_event.wait(2 * 60): 
+                break
+        else:
+            shared.log("SNAPRETENTION", "Waiting for the next scheduled run...")
+            if stop_event.wait(12 * 60 * 60):
+                break 
+
+def snap_week_ret():
+    while not stop_event.is_set():
+        shared.log("SNAPRETENTION", "Running week retention task...")
+        cmd = f'/lustre/adm/lsnapDestroy.py -f dstor -c week -p {week_retention}'
+        result = shared.run_command(cmd)
+        if result[0] == 0:
+            shared.log("SNAPRETENTION", "Command failed, waiting for 2 minutes before retrying...")
+            if stop_event.wait(2 * 60): 
+                break
+        else:
+            shared.log("SNAPRETENTION", "Waiting for the next scheduled run...")
+            if stop_event.wait(12 * 60 * 60):
+                break 
+
+def snap_hourly():
+    while not stop_event.is_set():
+        shared.log("LSNAPBACKUP", "Running hourly task...")
+        cmd = f'/lustre/adm/lsnapCreate.py -f dstor -l hour_local'
+        result = shared.run_command(cmd)
+        if result[0] == 0:
+            shared.log("LSNAPBACKUP", "Command failed, waiting for 2 minutes before retrying...")
+            if stop_event.wait(2 * 60): 
+                break
+        else:
+            shared.log("LSNAPBACKUP", "Waiting for the next scheduled run...")
+            if stop_event.wait(60 * 60):
+                break
+
+def snap_daily():
+    while not stop_event.is_set():
+        shared.log("LSNAPBACKUP", "Running daily task...")
+        cmd = f'/lustre/adm/lsnapCreate.py -f dstor -l day_local'
+        result = shared.run_command(cmd)
+        if result[0] == 0:
+            shared.log("LSNAPBACKUP", "Command failed, waiting for 2 minutes before retrying...")
+            if stop_event.wait(2 * 60): 
+                break
+        else:
+            shared.log("LSNAPBACKUP", "Waiting for the next scheduled run...")
+            if stop_event.wait(24 * 60 * 60):
+                break 
+
+def snap_weekly():
+    while not stop_event.is_set():
+        shared.log("LSNAPBACKUP", "Running 24-hour task...")
+        cmd = f'/lustre/adm/lsnapCreate.py -f dstor -l week_local'
+        result = shared.run_command(cmd)
+        if result[0] == 0:
+            shared.log("LSNAPBACKUP", "Command failed, waiting for 2 minutes before retrying...")
+            if stop_event.wait(2 * 60): 
+                break
+        else:
+            shared.log("LSNAPBACKUP", "Waiting for the next scheduled run...")
+            if stop_event.wait(7 * 24 * 60 * 60):
+                break
+
+def signal_handler(signum, frame):
+    shared.log(f"LSNAPBACKUP", f"Received signal {signum}, shutting down gracefully...")
+    stop_event.set()
+
+
+def main():
+
+    parser = argparse.ArgumentParser(description="Creating snapshots for backup")
+    parser.add_argument("-s", "--shell", action="store_true", help="Run interactive mode")
+    parser.add_argument("-d", "--daemon", action="store_true", help="Run daemon mode")
+
+    args = parser.parse_args()
+
+    if args.shell:
+        shared.log("LSNAPBACKUP", "Running hourly task...")
+        cmd = f'/lustre/adm/lsnapCreate.py -f dstor -l hour_local'
+        result = shared.run_command(cmd)
+        if result[0] == 0:
+            shared.log("LSNAPBACKUP", "Command failed, waiting for 2 minutes before retrying...")
+        else:
+            shared.log("LSNAPBACKUP", "Waiting for the next scheduled run...")
+
+    elif args.daemon:
+        global stop_event
+        stop_event = threading.Event()
+
+        thread_hourly = threading.Thread(target=snap_hourly, daemon=True)
+        thread_daily = threading.Thread(target=snap_daily, daemon=True)
+        thread_weekly = threading.Thread(target=snap_weekly, daemon=True)
+        thread_hourly_ret = threading.Thread(target=snap_hour_ret, daemon=True)
+        thread_daily_ret = threading.Thread(target=snap_day_ret, daemon=True)
+        thread_weekly_ret = threading.Thread(target=snap_week_ret, daemon=True)
+
+        thread_hourly.start()
+        time.sleep(10)
+        thread_hourly_ret.start()
+        time.sleep(30)
+        thread_daily.start()
+        time.sleep(10)
+        thread_daily_ret.start()
+        time.sleep(30)
+        thread_weekly.start()
+        time.sleep(10)
+        thread_weekly_ret.start()
+
+        signal.signal(signal.SIGTERM, signal_handler)
+        signal.signal(signal.SIGINT, signal_handler)
+
+        try:
+            while not stop_event.is_set():
+                time.sleep(1)
+        except Exception as e:
+            shared.log(f"LSNAPBACKUP", f"Exception in daemon: {e}")
+        finally:
+            shared.log("LSNAPBACKUP", "Snap backup has stopped.")
+
+    else:
+        print("Please provide either -s (shell) or -d (daemon) mode.")
+
+if __name__ == "__main__":
+    main()

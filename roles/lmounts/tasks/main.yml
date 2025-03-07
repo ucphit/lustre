@@ -1,0 +1,21 @@
+---
+  - name: Read ldev.conf
+    ansible.builtin.command: cat /etc/ldev.conf
+    register: file_lines
+
+  - name: Parse lines matching inventory_hostname
+    ansible.builtin.set_fact:
+      # matches bliver en liste med alle fundne linjer for denne host
+      matches: "{{ matches | default([]) + [ {
+          'host1':  splitted[0],
+          'pool':    splitted[3] | regex_replace('^zfs:([^/]+)/.*', '\\1'),
+          'dataset': splitted[3] | regex_replace('^zfs:.*/(.*)', '\\1')
+        } ] }}"
+    loop: "{{ file_lines.stdout_lines }}"
+    vars:
+      splitted: "{{ item.split() }}"
+    when: splitted[0] == inventory_hostname[:-2]
+
+  - name: Run loop tasks
+    ansible.builtin.include_tasks: loop.yml
+    loop: "{{ matches | default([]) }}"

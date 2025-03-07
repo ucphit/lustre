@@ -1,0 +1,44 @@
+---
+- name: Templating the backup script
+  ansible.builtin.template:
+    src: lustre_snapbackup.py.j2
+    dest: /lustre/adm/lustre_snapbackup.py
+    owner: root
+    group: root
+    mode: u=rwx,g=rwx,o=r
+
+- name: Templating the snapDestroy script
+  ansible.builtin.template:
+    src: lsnapDestroy.py.j2
+    dest: /lustre/adm/lsnapDestroy.py
+    owner: root
+    group: root
+    mode: u=rwx,g=rwx,o=r
+
+- name: Copy script to mgs
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /lustre/adm/
+    owner: root
+    group: root
+    mode: u=rwx,g=rwx,o=r
+  with_fileglob:
+    - "files/adm/*"
+
+- name: Copy service to mgs
+  ansible.builtin.copy:
+    src: "files/services/lsnapbackup.service"
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: u=rwx,g=rwx,o=r
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: (Re)Start lsnapbackup service
+  ansible.builtin.systemd:
+    name: lsnapbackup.service
+    state: restarted
+    enabled: yes

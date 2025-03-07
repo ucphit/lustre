@@ -1,0 +1,31 @@
+---
+- name: Configure lnet
+  vars:
+    device_name: Lustre
+  block:
+  - name: Gather interface facts
+    ansible.builtin.setup:
+      gather_subset:
+        - network
+    register: result
+
+  - name: Get lustre int ip
+    ansible.builtin.set_fact:
+      ip: "{{ result.ansible_facts['ansible_' + device_name].ipv4.address }}"
+
+  - name: Upload lnet.conf
+    ansible.builtin.template:
+      src: lnet.j2
+      dest: /etc/lnet.conf
+      owner: root
+      group: root
+      mode: "0644"
+
+  - name: Set /etc/modprobe.d/lustre.conf
+    ansible.builtin.template:
+      src: modprobe.j2
+      dest: /etc/modprobe.d/lustre.conf
+      owner: root
+      group: root
+      mode: "0644"
+      backup: yes

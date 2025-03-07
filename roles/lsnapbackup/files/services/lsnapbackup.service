@@ -1,0 +1,16 @@
+[Unit]
+Description=Backup snapshot daemon
+After=network.target
+
+[Service]
+User=root
+Group=root
+ExecStart=/lustre/adm/lustre_snapbackup.py -d
+TimeoutStopSec=30
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

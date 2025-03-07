@@ -1,0 +1,106 @@
+#!/usr/bin/python3
+
+import time, signal, shared, socket, sys, argparse
+from concurrent.futures import ThreadPoolExecutor
+from threading import Event
+from itertools import zip_longest
+
+running = Event()
+running.set()
+
+snapshot_file = "/var/log/last_snapshot.txt"
+
+if shared.ldevInfo(f'{{ primary_mgs }}', )[0] == 1:
+    primary_cluster = shared.ldevInfo(f'{{ primary_mgs }}', )[1:]
+else:
+    shared.log("LSNAPRETENTION", f"Error in retrieving ldev info")
+
+if shared.ldevInfo(f'{{ secondary_mgs }}', )[0] == 1:
+    secondary_cluster = shared.ldevInfo(f'{{ secondary_mgs }}', )[1:]
+else:
+    shared.log("LSNAPRETENTION", f"Error in retrieving ldev info")
+
+def snapshot_clean(snap_name):
+    for cluster in (primary_cluster, secondary_cluster):
+        for node in cluster:
+            if shared.get_zfs_snapshots(node[0],node[2])[0] == 1:
+                list = [item.split('@')[1] for item in shared.get_zfs_snapshots(node[0],node[2])[1:]]
+                for snap in list:
+                    if snap.endswith('remote') and (snap != snap_name):
+                        cmd = f"ssh {node[0]} zfs destroy {node[2]}@{snap}"
+                        shared.run_command(cmd)
+                        shared.log("SNAPCLEAN", f"Deleting snapshot {node[2]}@{snap} on {node[0]}")
+            else:
+                shared.log("SNAPCLEAN","Error in retrieving snapshots")
+
+def replicate(i, new_snapshot_name, last_snapshot=None):
+    pairs = []
+    for primary in primary_cluster:
+        key = primary[2]
+        secondary = next((s for s in secondary_cluster if s[2] == key), None)   
+        if secondary is None:
+            shared.log("SNAPREPLICATION", f"Error in compairing ldev's")
+            raise ValueError(f"No match found for {primary}")
+        pairs.append([primary[0],secondary[0]])
+
+    backup_node = next((pair[1] for pair in pairs if pair[0] == i[0]), None)
+
+    if last_snapshot is None:
+        cmd = f'ssh {i[0]} "zfs send {i[2]}@{new_snapshot_name} | ssh {backup_node} zfs receive -F {i[2]}"'
+    else:
+        cmd = f'ssh {i[0]} "zfs send -R -I {i[2]}@{last_snapshot} {i[2]}@{new_snapshot_name} | ssh {backup_node} zfs receive -F {i[2]}"'
+    shared.log("SNAPREPLICATION", f"Executing replication command: {cmd}")
+    result = shared.run_command(cmd)
+    if result[0] == 0:
+        shared.log("SNAPREPLICATION", f"Error: {result[1]}")
+
+def replication():
+
+    last_snapshot = shared.read_last_snapshot(snapshot_file)
+    shared.log("SNAPREPLICATION", f"Last snapshot was: {last_snapshot}")
+
+    new_snapshot_name = f"snapshot_{int(time.time())}_remote"
+    shared.log("SNAPREPLICATION", f"Creating new snapshot: {new_snapshot_name}")
+    shared.write_last_snapshot(snapshot_file, new_snapshot_name) 
+
+    for i in primary_cluster:
+        shared.make_zfs_snapshot(i[0],i[2],new_snapshot_name)
+
+    with ThreadPoolExecutor() as executor:
+        if last_snapshot is None:
+            shared.log("SNAPREPLICATION", "Performing full baseline replication")
+            futures = [executor.submit(replicate, i, new_snapshot_name) for i in primary_cluster]
+        else:
+            shared.log("SNAPREPLICATION", "Performing incremental replication")
+            futures = [executor.submit(replicate, i, new_snapshot_name, last_snapshot) for i in primary_cluster]
+
+        for future in futures:
+            future.result()
+
+    shared.log("SNAPREPLICATION", "Replication task completed.")  
+
+    shared.log("SNAPCLEAN", "Starting remote snapshot cleaning.")
+    snapshot_clean(new_snapshot_name)
+    shared.log("SNAPCLEAN", "Task snapshot cleaning completed.")
+
+def signal_handler(sig, frame):
+    print("Daemon is stopping...")
+    running.clear()
+
+def main():
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+
+    while running:
+        replication()
+        for _ in range(1200):
+            if not running.is_set():
+                sys.exit()
+            time.sleep(1)
+
+    shared.log("SNAPREPLICATION", "Daemon stopped.")
+
+
+if __name__ == "__main__":
+
+    main()
