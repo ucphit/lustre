@@ -4,10 +4,6 @@
     path: "{{ mount_path  }}/{{ item['dataset'] }}"
   register: mountpoint_status
 
-- name: debug
-  ansible.builtin.debug:
-    msg: "{{ mountpoint_status.stat.exists }}"
-
 - name: Opret mountpoint hvis det ikke findes
   ansible.builtin.file:
     path: "{{ mount_path  }}/{{ item['dataset'] }}"
@@ -22,3 +18,4 @@
     fstype: lustre
     opts: "{{ mount_opts }}"
     state: present
+  when: not mountpoint_status.stat.exists
