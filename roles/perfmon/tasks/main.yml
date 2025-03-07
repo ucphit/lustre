@@ -1,0 +1,11 @@
+---
+- name: Install packages
+  ansible.builtin.yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - iperf
+    - python3-dnf-plugin-versionlock
+    - iftop
+    - bonnie++

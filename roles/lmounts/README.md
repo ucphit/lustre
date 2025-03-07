@@ -7,7 +7,7 @@ A role that configures the Lustre mountpoints through /etc/fstab.
 The role will implement the following naming convention for the mountpoints:
 
 ```
-            { role }{  }
+            { fs dataset path }{ mountpoint } lustre {mount options} 0 0
 ```
 In the example we end up with the following /etc/fstab entries for nodeoss01:
 ```
