@@ -18,3 +18,4 @@
     src: templates/bindings.j2
     dest: /etc/multipath/bindings
     mode: "0755"
+ 
