@@ -2,7 +2,7 @@
 - name: Generate info tree of SAS devices
   block:
     - name: Gather SAS controller based bindings
-      sas_multipath_facts:
+      lustre.sas_multipath_facts:
         primary: "{{ dm_multipath_sas_jbods['primary'] | default(omit) }}"
         secondary: "{{ dm_multipath_sas_jbods['secondary'] | default(omit) }}"
   always:
