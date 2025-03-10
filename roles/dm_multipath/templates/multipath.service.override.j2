@@ -1,0 +1,6 @@
+[Service]
+ExecStartPre=
+ExecStartPre=-/sbin/modprobe -a scsi_dh_alua scsi_dh_emc scsi_dh_rdac dm-multipath
+ExecStartPre=-/sbin/multipath -A -B
+ExecStart=
+ExecStart=/sbin/multipathd -d -s -B

@@ -2,6 +2,7 @@
   - name: Read ldev.conf
     ansible.builtin.command: cat /etc/ldev.conf
     register: file_lines
+    changed_when: false
 
   - name: Parse lines matching inventory_hostname
     ansible.builtin.set_fact:

@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+
+{% for jbod_name, jbod_content in ansible_facts['sas_jbods'].items() %}
+{% for disk in jbod_content['disks'] %}
+{{ jbod_content['role']}}-{{ disk['type'] }}-{{ disk['wwid'] }} {{ disk['wwid'] }}
+{% endfor %}
+{% endfor %}

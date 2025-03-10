@@ -3,6 +3,7 @@
   ansible.builtin.lineinfile:
     path: /etc/ldev.conf
     line: "{{ item.key }}\t{{ item.value.failover }}\t{{ subitem['filesystem'] }}-{{ item.value.role[:-1] | upper }}T{{ '%04d' | format(subitem['index']|int) }}\tzfs:{{ item.value.role }}_{{ subitem['index'] }}_{{ subitem['filesystem'] }}/{{ subitem['filesystem'] }}{{ subitem['index'] }} "
+    state: present
   loop: "{{ lcfg[item.key]['zfs_pools'] | default([]) }}"
   loop_control:
     loop_var: subitem
