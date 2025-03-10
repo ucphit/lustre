@@ -16,3 +16,4 @@
     name: "{{ dm_multipath_service }}"
     state: reloaded
     enabled: true
+  changed_when: False
