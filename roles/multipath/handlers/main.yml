@@ -1,0 +1,7 @@
+---
+# here it might be necessary to rescan the SCSI bus first
+
+- name: Reload multipathd
+  ansible.builtin.service:
+    name: "{{ dm_multipath_service }}"
+    state: reloaded

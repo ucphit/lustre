@@ -1,0 +1,60 @@
+#jinja2:lstrip_blocks: True
+# {{ ansible_managed }}
+
+defaults {
+  find_multipaths {{ dm_multipath_defaults_find_multipaths }}
+  user_friendly_names {{ dm_multipath_defaults_user_friendly_names }}
+  {% if dm_multipath_defaults is defined %}
+  {% for key, value in dm_multipath_defaults.items() %}
+  {{ key }} {{ value }}
+  {% endfor %}
+  {% endif %}
+}
+{% if dm_multipath_blacklist_devices is defined %}
+
+blacklist {
+  {% for device in dm_multipath_blacklist_devices %}
+  device {
+    {% for key, value in device.items() %}
+    {{ key }} {{ value }}
+    {% endfor %}
+  }
+  {% endfor %}
+}
+{% endif %}
+{% if dm_multipath_blacklist_exceptions is defined %}
+
+blacklist_exceptions {
+  {% for device in dm_multipath_blacklist_exceptions %}
+  device {
+    {% for key, value in device.items() %}
+    {{ key }} {{ value }}
+    {% endfor %}
+  }
+  {% endfor %}
+}
+{% endif %}
+{% if dm_multipath_devices is defined %}
+
+devices {
+  {% for device in dm_multipath_devices %}
+  device {
+    {% for key, value in device.items() %}
+    {{ key }} {{ value }}
+    {% endfor %}
+  }
+  {% endfor %}
+}
+{% endif %}
+{% if dm_multipath_multipaths is defined %}
+
+multipaths {
+  {% for multipath in dm_multipath_multipaths %}
+  multipath {
+    {% for key, value in multipath.items() %}
+    {{ key }} {{ value }}
+    {% endfor %}
+  }
+  {% endfor %}
+}
+{% endif %}
