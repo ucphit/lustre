@@ -10,7 +10,7 @@ Install dm-multipath and configure with defaults and ensure it's started:
 ...
     - hosts: all
       roles:
-         - dm_multipath
+         - ucphit.lustre.dm_multipath
 ```
 
 
@@ -30,7 +30,7 @@ instead creates multipath devices named like: `/dev/mapper/primary-<WWID>`.
         dm_multipath_defaults_find_multipaths: "no"
         dm_multipath_defaults_user_friendly_names: "no"
       roles:
-         - dm_multipath
+         - ucphit.lustre.dm_multipath
 ```
 
 ## License
