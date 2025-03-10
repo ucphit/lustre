@@ -1,0 +1,37 @@
+---
+- name: List disks
+  command: lsblk -o NAME,FSTYPE,TYPE,SIZE,LABEL -J
+  register: lsblk_output
+  changed_when: False
+
+- name: Get result from lsblk
+  ansible.builtin.set_fact:
+    l2arc_result: "{{ lsblk_output.stdout }}"
+
+- name: Empty lists
+  ansible.builtin.set_fact:
+    disks_raw: []
+    disks: []
+
+- name: Gather unique wwid devices
+  ansible.builtin.set_fact:
+    disks: "{{ (disks_raw + (id.children | map(attribute='name') | list)) | unique }}"
+  loop: "{{ l2arc_result.blockdevices }}"
+  loop_control:
+    loop_var: id
+  when: id.type == 'disk' and id.children[0].fstype == None and id.children[0].name.startswith(inventory_hostname[:-2] ~ '-ssd')
+
+- name: List all zpools
+  ansible.builtin.command: "zpool list -H -o name"
+  register: zpool_list
+  changed_when: False
+
+- name: Set fact if l2arc exists
+  ansible.builtin.set_fact:
+    l2arc_exists: "{{ 'l2arc' in zpool_list.stdout_lines }}"
+
+- name: Make the l2arc zpool
+  ansible.builtin.shell: |
+    zpool create l2arc {{ disks[0] }}
+  when: not l2arc_exists and (disks | length) >= 2
+
