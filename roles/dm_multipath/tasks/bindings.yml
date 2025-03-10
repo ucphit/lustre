@@ -1,0 +1,20 @@
+---
+- name: Generate info tree of SAS devices
+  block:
+    - name: Gather SAS controller based bindings
+      sas_multipath_facts:
+        primary: "{{ dm_multipath_sas_jbods['primary'] | default(omit) }}"
+        secondary: "{{ dm_multipath_sas_jbods['secondary'] | default(omit) }}"
+  always:
+    - name: Print generated SAS controller structure
+      ansible.builtin.debug:
+        var: ansible_facts['sas_ctrls']
+    - name: Print generated SAS JBOD structure
+      ansible.builtin.debug:
+        var: ansible_facts['sas_jbods']
+
+- name: Generate device name bindings
+  ansible.builtin.template:
+    src: templates/bindings.j2
+    dest: /etc/multipath/bindings
+    mode: "0755"

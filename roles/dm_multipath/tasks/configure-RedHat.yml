@@ -1,0 +1,39 @@
+---
+- name: Ensure /etc/multipath exists
+  ansible.builtin.file:
+    state: directory
+    path: /etc/multipath
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure /etc/multipath/conf.d exists
+  ansible.builtin.file:
+    state: directory
+    path: /etc/multipath/conf.d
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Manage multipath.conf configuration
+  ansible.builtin.template:
+    src: "{{ dm_multipath_conf_template }}"
+    dest: /etc/multipath.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Reload multipathd
+
+- name: Create systemd overrride directory for multipath
+  ansible.builtin.file:
+    name: /etc/systemd/system/multipath.service.d/
+    state: directory
+    mode: "0755"
+  when: dm_multipath_daemon_readonly_bindings
+
+- name: Create systemd override config for multipath daemon
+  ansible.builtin.template:
+    src: templates/multipath.service.override.j2
+    dest: /etc/systemd/system/multipath.service.d/readonly-bindings.conf
+    mode: "0755"
+  when: dm_multipath_daemon_readonly_bindings

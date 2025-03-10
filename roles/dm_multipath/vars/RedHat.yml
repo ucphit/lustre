@@ -1,0 +1,6 @@
+---
+dm_multipath_packages:
+  - device-mapper-multipath
+  - sg3_utils
+
+dm_multipath_service: multipathd
