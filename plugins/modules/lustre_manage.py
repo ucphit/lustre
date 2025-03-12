@@ -98,7 +98,7 @@ def run_module():
     result = dict(changed=False, message='')
 
     module = AnsibleModule(argument_spec=module_args, supports_check_mode=False)
-
+    module.warn(f"Running with params: {module.params}")
     if module.check_mode:
         module.exit_json(**result)
 
@@ -132,9 +132,11 @@ def run_module():
 def mk_fs(fs_type, node_type, fs_name, index, mgs_nodes, service_nodes, name):
     try:
         command = ['mkfs.lustre', f'--backfstype={fs_type}', f'--{node_type}']
-        command += ['--fsname', fs_name]
 
         if node_type in ('mdt', 'ost'):
+            if fs_name is None:
+                return False, f'fsname is required for {node_type.upper()}'
+            command += ['--fsname', fs_name]
             if index is None:
                 return False, f'Index is required for {node_type.upper()}'
             command += [f'--index={index}']
@@ -149,9 +151,6 @@ def mk_fs(fs_type, node_type, fs_name, index, mgs_nodes, service_nodes, name):
 
         # Add device name (ZFS volume)
         command.append(name)
-
-        # Debug print of command (optional)
-        # print("Running command:", ' '.join(command))
 
         subprocess.run(command, check=True)
         return True, f'Lustre {node_type.upper()} filesystem created successfully.'
